@@ -79,7 +79,13 @@ ClickGenShin(X, Y) {
     MouseClick(, X, Y)
     Sleep 50
     MouseMove(XX, YY)
+    AutoPressF()
 }
+
+AutoPressF() {
+    Send("f")
+}
+
 
 ; ToolTip
 MyToolTip(Params*) {
