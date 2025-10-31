@@ -75,10 +75,10 @@ SendGenshin(K) {
 ClickGenShin(X, Y) {
     if not WinActive(GenshinTitle)
         return
-    MouseGetPos(&XX, &YY)
-    MouseClick(, X, Y)
-    Sleep 50
-    MouseMove(XX, YY)
+   ; MouseGetPos(&XX, &YY)
+   ; MouseClick(, X, Y)
+   ; Sleep 50
+   ; MouseMove(XX, YY)
     AutoPressF()
 }
 
