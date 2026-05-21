@@ -62,7 +62,8 @@ for T in GenshinTitles
     GroupAdd "Genshin", "ahk_exe" T
 GenshinTitle := "ahk_group Genshin"
 WinWait(GenshinTitle)
-WinGetClientPos(, , &W, &H, GenshinTitle)
+global WinX := 0, WinY := 0
+WinGetClientPos(&WinX, &WinY, &W, &H, GenshinTitle)
 A_TrayMenu.Enable(TrayMenu_Enabler)
 
 ; Interact
@@ -109,10 +110,11 @@ ScaleYBottom720 := (Y) => H - 1 - ScaleX(719 - Y)
 ScaleXCenter1280 := (X) => (W - 1) / 2 + Scale * (X - 639.5)
 
 UpdateWH() {
-    global W, H
-    WinGetClientPos(, , &WW, &HH, GenshinTitle)
+    global W, H, WinX, WinY
+    WinGetClientPos(&NewWinX, &NewWinY, &WW, &HH, GenshinTitle)
     if WW != W or HH != H
         Reload
+    WinX := NewWinX, WinY := NewWinY
     W := WW, H := HH
     global Scale := Min(W / 1280, H / 720)
     global IsNotWideScreen := W < 2 * H
@@ -126,7 +128,7 @@ DetectPixels(L, &OutX, &OutY) {
     for IT in L {
         ; X Y ColorID DiffX DIffY DiffC
         X := IT[1], Y := IT[2], ColorID := IT[3], DiffX := IT[4], DiffY := IT[5], DiffC := IT[6]
-        Ret := Ret and PixelSearch(&OutX, &OutY, Floor(X - DiffX), Floor(Y - DiffY), Ceil(X + DiffX), Ceil(Y + DiffY), ColorID, DiffC)
+        Ret := Ret and PixelSearch(&OutX, &OutY, Floor(WinX + X - DiffX), Floor(WinY + Y - DiffY), Ceil(WinX + X + DiffX), Ceil(WinY + Y + DiffY), ColorID, DiffC)
     }
     if Ret
         MyToolTip "!", OutX + 1, OutY + 1
@@ -228,31 +230,14 @@ ToggleClickOption(ItemName := TrayMenu_SkipClickOption, ItemPos?, MyMenu := A_Tr
 }
 
 ClickDialogue() {
-    ToolTip
     if not WinActive(GenshinTitle) or GetKeyState("Alt")
         return
-    UpdateWH
-    if DetectClick(&OutX, &OutY) {
-        if DetectPlay(&OutXX, &OutYY)
-            SendGenshin("{Space}")
-        else
-            ClickGenShin(OutX, OutY)
-        return
-    }
-    if not Config_SkipClickOption_Enabled and DetectOption(&OutX, &OutY) {
-        ClickGenShin(OutX, OutY)
-        return
-    }
-    if DetectClick2(&OutX, &OutY) {
-        ClickGenShin(OutX, OutY)
-        return
-    }
-    MyToolTip "?", 0, 0
+    AutoPressF()
 }
 
 ToggleClickDialogue(ItemName := TrayMenu_Enabler, ItemPos?, MyMenu := A_TrayMenu) {
     static Toggle := 0
-    SetTimer ClickDialogue, Toggle := !Toggle ? 200 : 0
+    SetTimer ClickDialogue, Toggle := !Toggle ? 300 : 0
     if Toggle {
         MyMenu.Check(ItemName)
     } else {
